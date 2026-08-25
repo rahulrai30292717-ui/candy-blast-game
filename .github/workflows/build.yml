@@ -5,13 +5,13 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Source
+      - name: Checkout Code
         uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 18
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -22,22 +22,18 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Create Native Android Project
+      - name: Build Standalone APK
         run: |
-          npm init -y
-          npm install @capacitor/core @capacitor/cli @capacitor/android
-          npx cap init "Crystal Saga" "com.crystalsaga.app" --web-dir www
-          npx cap add android
-          npx cap copy
+          npm install -g cordova
+          cordova create crystalapp com.crystalsaga.app "Crystal Saga"
+          rm -rf crystalapp/www/*
+          cp index.html crystalapp/www/
+          cd crystalapp
+          cordova platform add android
+          cordova build android --debug
 
-      - name: Build Debug APK
-        run: |
-          cd android
-          chmod +x ./gradlew
-          ./gradlew assembleDebug
-
-      - name: Upload APK
+      - name: Upload Finished APK
         uses: actions/upload-artifact@v4
         with:
           name: CrystalSaga-APK
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          path: crystalapp/platforms/android/app/build/outputs/apk/debug/app-debug.apk
