@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Crystal Saga - HD Deluxe</title>
+  <title>Crystal Saga - Smart AI PvP</title>
   <style>
     * {
       box-sizing: border-box;
@@ -25,18 +25,7 @@
       overflow: hidden;
     }
 
-    /* High Quality Ambient Glow */
-    .ambient-glow {
-      position: absolute;
-      width: 320px;
-      height: 320px;
-      background: radial-gradient(circle, rgba(0,240,255,0.15), rgba(255,0,128,0.08), transparent 70%);
-      pointer-events: none;
-      filter: blur(40px);
-      z-index: 1;
-    }
-
-    /* Start Menu Screen */
+    /* Start Screen */
     #start-screen {
       position: absolute;
       top: 0; left: 0; width: 100%; height: 100%;
@@ -50,7 +39,7 @@
       padding: 20px;
     }
     .game-logo {
-      font-size: 40px;
+      font-size: 38px;
       font-weight: 900;
       background: linear-gradient(45deg, #00ffff, #ff007f, #ffd166);
       -webkit-background-clip: text;
@@ -79,29 +68,40 @@
       letter-spacing: 1px;
       transition: transform 0.1s;
     }
-    .btn-solo {
-      background: linear-gradient(45deg, #00f0ff, #7000ff);
-      box-shadow: 0 0 25px rgba(0, 240, 255, 0.5);
-    }
-    .btn-pvp {
-      background: linear-gradient(45deg, #ff007f, #ff7b00);
-      box-shadow: 0 0 25px rgba(255, 0, 127, 0.5);
-    }
+    .btn-solo { background: linear-gradient(45deg, #00f0ff, #7000ff); box-shadow: 0 0 25px rgba(0, 240, 255, 0.5); }
+    .btn-pvp  { background: linear-gradient(45deg, #ff007f, #ff7b00); box-shadow: 0 0 25px rgba(255, 0, 127, 0.5); }
     .menu-btn:active { transform: scale(0.94); }
+
+    /* Matchmaking Screen */
+    #matchmaking-screen {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(5, 0, 15, 0.98);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 250;
+      text-align: center;
+    }
+    .radar {
+      width: 80px; height: 80px;
+      border: 3px solid #00ffff;
+      border-radius: 50%;
+      border-top-color: transparent;
+      animation: spin 1s linear infinite;
+      margin-bottom: 20px;
+    }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
 
     /* Game UI */
     #game-ui {
       display: none;
       flex-direction: column;
       align-items: center;
-      z-index: 10;
     }
 
-    #solo-hud {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
+    #solo-hud { display: flex; flex-direction: column; align-items: center; }
     .top-bar {
       display: flex;
       width: 360px;
@@ -109,11 +109,7 @@
       align-items: center;
       margin-bottom: 8px;
     }
-    .hud {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 10px;
-    }
+    .hud { display: flex; gap: 8px; margin-bottom: 10px; }
     .hud-card {
       background: rgba(255, 255, 255, 0.07);
       border: 1px solid rgba(0, 240, 255, 0.35);
@@ -121,17 +117,11 @@
       border-radius: 12px;
       text-align: center;
       min-width: 65px;
-      backdrop-filter: blur(10px);
-      box-shadow: inset 0 0 10px rgba(255,255,255,0.05);
     }
     .hud-title { font-size: 9px; text-transform: uppercase; color: #00ffff; font-weight: bold; }
     .hud-val { font-size: 18px; font-weight: bold; }
 
-    #pvp-hud {
-      display: none;
-      flex-direction: column;
-      align-items: center;
-    }
+    #pvp-hud { display: none; flex-direction: column; align-items: center; }
     .pvp-header {
       display: flex;
       width: 360px;
@@ -147,17 +137,16 @@
       padding: 8px 10px;
       text-align: center;
       transition: all 0.3s ease;
-      backdrop-filter: blur(8px);
     }
     .p1-active {
       border-color: #00f0ff;
       background: rgba(0, 240, 255, 0.15);
-      box-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
     }
     .p2-active {
       border-color: #ff007f;
       background: rgba(255, 0, 127, 0.15);
-      box-shadow: 0 0 20px rgba(255, 0, 127, 0.4);
+      box-shadow: 0 0 15px rgba(255, 0, 127, 0.4);
     }
     .player-name { font-size: 11px; font-weight: bold; text-transform: uppercase; }
     .player-score { font-size: 20px; font-weight: 900; margin: 2px 0; }
@@ -184,9 +173,7 @@
       cursor: pointer;
     }
 
-    #game-container {
-      position: relative;
-    }
+    #game-container { position: relative; }
 
     .grid {
       width: 360px;
@@ -194,13 +181,12 @@
       display: grid;
       grid-template-columns: repeat(8, 45px);
       grid-template-rows: repeat(8, 45px);
-      background: rgba(10, 0, 25, 0.88);
+      background: rgba(10, 0, 25, 0.9);
       border: 2px solid rgba(0, 240, 255, 0.4);
-      border-radius: 20px;
-      box-shadow: 0 0 35px rgba(0, 240, 255, 0.2), inset 0 0 25px rgba(0,0,0,0.9);
+      border-radius: 18px;
+      box-shadow: 0 0 30px rgba(0,0,0,0.8);
       position: relative;
       overflow: hidden;
-      backdrop-filter: blur(8px);
     }
 
     .candy {
@@ -210,12 +196,12 @@
       border-radius: 50%;
       cursor: pointer;
       position: relative;
-      box-shadow: inset -4px -4px 10px rgba(0,0,0,0.7), inset 4px 4px 10px rgba(255,255,255,0.85), 0 4px 8px rgba(0,0,0,0.5);
+      box-shadow: inset -4px -4px 10px rgba(0,0,0,0.7), inset 4px 4px 10px rgba(255,255,255,0.85);
       transition: transform 0.12s ease;
     }
-    .candy:active { transform: scale(1.2); }
+    .candy:active { transform: scale(1.18); }
 
-    /* Ultra HD Faceted Crystal Colors */
+    /* Faceted Crystal Themes */
     .c-ruby    { background: radial-gradient(circle at 35% 30%, #ff9ebb, #e60045 60%, #4a0014); box-shadow: 0 0 10px rgba(230,0,69,0.5); }
     .c-amber   { background: radial-gradient(circle at 35% 30%, #fff0a8, #ff8c00 60%, #612800); border-radius: 10px; box-shadow: 0 0 10px rgba(255,140,0,0.5); }
     .c-emerald { background: radial-gradient(circle at 35% 30%, #9effcb, #00b359 60%, #00361a); border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; box-shadow: 0 0 10px rgba(0,179,89,0.5); }
@@ -223,6 +209,7 @@
     .c-amethyst{ background: radial-gradient(circle at 35% 30%, #fabdff, #aa00ff 60%, #350054); border-radius: 20% 50%; box-shadow: 0 0 10px rgba(170,0,255,0.5); }
     .c-diamond { background: radial-gradient(circle at 35% 30%, #ffffff, #b8c4d6 60%, #1e293b); clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); box-shadow: 0 0 12px rgba(255,255,255,0.6); }
 
+    /* Modals */
     .modal-overlay {
       position: absolute;
       top: 0; left: 0; width: 100%; height: 100%;
@@ -264,18 +251,25 @@
 </head>
 <body>
 
-  <div class="ambient-glow"></div>
-
   <!-- Start Screen -->
   <div id="start-screen">
-    <div class="game-logo">💎 CRYSTAL SAGA HD</div>
-    <div class="game-subtitle">Deluxe Crystal Edition</div>
+    <div class="game-logo">💎 CRYSTAL SAGA</div>
+    <div class="game-subtitle">Match & Crush Adventure</div>
     <button class="menu-btn btn-solo" onclick="startSoloGame()">🌟 SOLO ADVENTURE</button>
-    <button class="menu-btn btn-pvp" onclick="startPvpBattle()">⚔️ 1v1 BATTLE (60s)</button>
+    <button class="menu-btn btn-pvp" onclick="startMatchmaking()">⚔️ ONLINE 1v1 BATTLE</button>
+  </div>
+
+  <!-- Matchmaking Screen -->
+  <div id="matchmaking-screen">
+    <div class="radar"></div>
+    <h3 style="color:#00ffff; margin-bottom: 5px;">Finding Online Player...</h3>
+    <p style="font-size: 12px; color: #94a3b8;">Connecting to server...</p>
   </div>
 
   <!-- Game UI -->
   <div id="game-ui">
+    
+    <!-- Solo HUD -->
     <div id="solo-hud">
       <div class="top-bar">
         <button class="home-icon-btn" onclick="goHome()">🏠 Menu</button>
@@ -302,6 +296,7 @@
       </div>
     </div>
 
+    <!-- PvP HUD -->
     <div id="pvp-hud">
       <div class="top-bar">
         <button class="home-icon-btn" onclick="goHome()">🏠 Menu</button>
@@ -310,18 +305,19 @@
       </div>
       <div class="pvp-header">
         <div id="p1-card" class="player-card p1-active">
-          <div class="player-name" style="color: #00f0ff;">Player 1 (You)</div>
+          <div class="player-name" style="color: #00f0ff;">You (Player 1)</div>
           <div class="player-score" id="p1-score">0</div>
           <div class="player-info">Moves: <span id="p1-moves">15</span></div>
         </div>
         <div id="p2-card" class="player-card">
-          <div class="player-name" style="color: #ff007f;">Player 2 (Opponent)</div>
+          <div class="player-name" id="bot-name" style="color: #ff007f;">Opponent</div>
           <div class="player-score" id="p2-score">0</div>
           <div class="player-info">Moves: <span id="p2-moves">15</span></div>
         </div>
       </div>
     </div>
 
+    <!-- Board -->
     <div id="game-container">
       <div class="grid" id="grid">
         <canvas id="canvas" class="particles"></canvas>
@@ -346,8 +342,8 @@
       <div id="pvp-result-modal" class="modal-overlay">
         <div class="modal-box">
           <h2 id="winner-title" style="margin:0; color:#ffd166;">🏆 MATCH OVER</h2>
-          <p id="winner-desc" style="font-size: 14px; color:#cbd5e1; margin-top: 8px;">Player 1 Won!</p>
-          <button class="btn-action" onclick="startPvpBattle()">PLAY AGAIN 🔄</button>
+          <p id="winner-desc" style="font-size: 14px; color:#cbd5e1; margin-top: 8px;">You Won!</p>
+          <button class="btn-action" onclick="startMatchmaking()">PLAY AGAIN 🔄</button>
         </div>
       </div>
 
@@ -376,8 +372,7 @@
       const t = actx.currentTime;
       const osc = actx.createOscillator();
       const gain = actx.createGain();
-      osc.connect(gain);
-      gain.connect(actx.destination);
+      osc.connect(gain); gain.connect(actx.destination);
 
       if (type === 'swap') {
         osc.type = 'sine';
@@ -417,6 +412,9 @@
     let curLevel = 1, targetScore = 1200, soloScore = 0, soloMoves = 25;
     let activePlayer = 1, p1Score = 0, p2Score = 0, p1Moves = 15, p2Moves = 15;
     let turnTime = 60, turnInterval = null;
+    let botMatchCount = 0;
+
+    const botNames = ['Alex_Pro', 'NeonKnight', 'CrystalQueen', 'ShadowHunter', 'RubyMaster'];
 
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
@@ -464,6 +462,7 @@
     function goHome() {
       clearInterval(turnInterval);
       document.getElementById('game-ui').style.display = 'none';
+      document.getElementById('matchmaking-screen').style.display = 'none';
       document.getElementById('start-screen').style.display = 'flex';
       document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none');
     }
@@ -483,15 +482,28 @@
       buildBoard();
     }
 
-    function startPvpBattle() {
+    function startMatchmaking() {
       initAudio();
+      document.getElementById('start-screen').style.display = 'none';
+      document.getElementById('pvp-result-modal').style.display = 'none';
+      document.getElementById('matchmaking-screen').style.display = 'flex';
+
+      let randBot = botNames[Math.floor(Math.random() * botNames.length)];
+      document.getElementById('bot-name').innerText = randBot + ' 🤖';
+
+      setTimeout(() => {
+        document.getElementById('matchmaking-screen').style.display = 'none';
+        startPvpGame();
+      }, 2500);
+    }
+
+    function startPvpGame() {
       gameMode = 'pvp';
       isGameOver = false;
-      document.getElementById('start-screen').style.display = 'none';
+      botMatchCount++;
       document.getElementById('game-ui').style.display = 'flex';
       document.getElementById('solo-hud').style.display = 'none';
       document.getElementById('pvp-hud').style.display = 'flex';
-      document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none');
 
       p1Score = 0; p2Score = 0;
       p1Moves = 15; p2Moves = 15;
@@ -544,33 +556,99 @@
         activePlayer = 2;
         document.getElementById('p1-card').classList.remove('p1-active');
         document.getElementById('p2-card').classList.add('p2-active');
+        
+        if (p1Moves <= 0 && p2Moves <= 0) {
+          endPvpBattle();
+        } else {
+          startTurnTimer();
+          // Trigger Smart Computer Bot Move
+          setTimeout(playComputerBotMove, 1200);
+        }
       } else {
         p2Moves--;
         document.getElementById('p2-moves').innerText = Math.max(0, p2Moves);
         activePlayer = 1;
         document.getElementById('p2-card').classList.remove('p2-active');
         document.getElementById('p1-card').classList.add('p1-active');
+
+        if (p1Moves <= 0 && p2Moves <= 0) {
+          endPvpBattle();
+        } else {
+          startTurnTimer();
+        }
+      }
+    }
+
+    // Smart AI Bot Move Calculation
+    function playComputerBotMove() {
+      if (isGameOver || activePlayer !== 2) return;
+
+      let possibleMoves = [];
+      for (let i = 0; i < 64; i++) {
+        let neighbors = [];
+        if (i % width < width - 1) neighbors.push(i + 1);
+        if (i < 56) neighbors.push(i + width);
+
+        for (let n of neighbors) {
+          // Virtual Swap test
+          let g1 = getG(squares[i]);
+          let g2 = getG(squares[n]);
+          setG(squares[i], g2); setG(squares[n], g1);
+          let matches = countMatches();
+          setG(squares[i], g1); setG(squares[n], g2);
+
+          if (matches > 0) possibleMoves.push({ from: i, to: n, matches });
+        }
       }
 
-      if (p1Moves <= 0 && p2Moves <= 0) {
-        endPvpBattle();
+      let selectedMove = null;
+      if (possibleMoves.length > 0) {
+        // Round 1-2: Bot plays simple/medium (Player wins easily)
+        // Round 3+: Bot plays best matches
+        if (botMatchCount <= 2) {
+          selectedMove = possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
+        } else {
+          possibleMoves.sort((a, b) => b.matches - a.matches);
+          selectedMove = possibleMoves[0];
+        }
       } else {
-        startTurnTimer();
+        // Fallback random move
+        let rIdx = Math.floor(Math.random() * 56);
+        selectedMove = { from: rIdx, to: rIdx + 1 };
       }
+
+      playGlassSound('swap');
+      swap(selectedMove.from, selectedMove.to);
+      setTimeout(switchPvpTurn, 500);
+    }
+
+    function countMatches() {
+      let count = 0;
+      for (let i = 0; i < 62; i++) {
+        let g = getG(squares[i]);
+        if ([6,7,14,15,22,23,30,31,38,39,46,47,54,55].includes(i) || !g) continue;
+        if (getG(squares[i+1]) === g && getG(squares[i+2]) === g) count += 3;
+      }
+      for (let i = 0; i < 48; i++) {
+        let g = getG(squares[i]);
+        if (!g) continue;
+        if (getG(squares[i+width]) === g && getG(squares[i+width*2]) === g) count += 3;
+      }
+      return count;
     }
 
     function bindTouch() {
       let sx, sy, sId;
       squares.forEach(sq => {
         sq.addEventListener('touchstart', e => {
-          if (isGameOver) return;
+          if (isGameOver || (gameMode === 'pvp' && activePlayer === 2)) return;
           sx = e.touches[0].clientX;
           sy = e.touches[0].clientY;
           sId = parseInt(sq.id);
         }, { passive: false });
 
         sq.addEventListener('touchend', e => {
-          if (isGameOver) return;
+          if (isGameOver || (gameMode === 'pvp' && activePlayer === 2)) return;
           if (gameMode === 'solo' && soloMoves <= 0) return;
           let ex = e.changedTouches[0].clientX;
           let ey = e.changedTouches[0].clientY;
@@ -723,13 +801,13 @@
       const desc = document.getElementById('winner-desc');
 
       if (p1Score > p2Score) {
-        title.innerText = "🎉 PLAYER 1 WINS!";
+        title.innerText = "🎉 YOU WON!";
         title.style.color = "#00f0ff";
-        desc.innerText = `Player 1 scored ${p1Score} pts vs ${p2Score} pts`;
+        desc.innerText = `You scored ${p1Score} pts vs Opponent's ${p2Score} pts`;
       } else if (p2Score > p1Score) {
-        title.innerText = "🎉 PLAYER 2 WINS!";
+        title.innerText = "😢 OPPONENT WON!";
         title.style.color = "#ff007f";
-        desc.innerText = `Player 2 scored ${p2Score} pts vs ${p1Score} pts`;
+        desc.innerText = `Opponent scored ${p2Score} pts vs Your ${p1Score} pts`;
       } else {
         title.innerText = "🤝 MATCH TIED!";
         title.style.color = "#ffd166";
