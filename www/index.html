@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Crystal Saga Pro</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      background: radial-gradient(circle at 50% 20%, #1a0b2e, #05020a);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #fff;
+      overflow: hidden;
+    }
+    .top-bar {
+      display: flex;
+      width: 352px;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .hud {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .hud-card {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 6px 10px;
+      border-radius: 12px;
+      text-align: center;
+      min-width: 65px;
+      backdrop-filter: blur(5px);
+    }
+    .hud-title { font-size: 10px; text-transform: uppercase; color: #00f0ff; font-weight: bold; }
+    .hud-val { font-size: 18px; font-weight: bold; }
+
+    .reward-btn {
+      background: linear-gradient(45deg, #00f0ff, #7000ff);
+      border: none;
+      color: white;
+      padding: 7px 12px;
+      border-radius: 20px;
+      font-weight: bold;
+      font-size: 11px;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0, 240, 255, 0.4);
+    }
+    .reward-btn:active { transform: scale(0.95); }
+
+    #game-container {
+      position: relative;
+    }
+
+    .grid {
+      width: 352px;
+      height: 352px;
+      display: grid;
+      grid-template-columns: repeat(8, 44px);
+      grid-template-rows: repeat(8, 44px);
+      background: rgba(10, 2, 20, 0.95);
+      border: 3px solid #00f0ff;
+      border-radius: 16px;
+      box-shadow: 0 0 25px rgba(0, 240, 255, 0.3), inset 0 0 15px rgba(0,0,0,0.8);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .candy {
+      width: 38px;
+      height: 38px;
+      margin: 3px;
+      border-radius: 50%;
+      cursor: pointer;
+      position: relative;
+      box-shadow: inset -3px -3px 8px rgba(0,0,0,0.6), inset 3px 3px 8px rgba(255,255,255,0.8), 0 3px 6px rgba(0,0,0,0.4);
+      transition: transform 0.1s ease;
+    }
+    .candy:active { transform: scale(1.15); }
+
+    /* Gem Themes */
+    .c-ruby   { background: radial-gradient(circle at 30% 30%, #ff6b8b, #d60036, #590014); }
+    .c-amber  { background: radial-gradient(circle at 30% 30%, #ffd166, #f3722c, #802000); border-radius: 8px; }
+    .c-emerald{ background: radial-gradient(circle at 30% 30%, #4ade80, #059669, #022c22); border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; }
+    .c-sapphire{ background: radial-gradient(circle at 30% 30%, #38bdf8, #0284c7, #082f49); border-radius: 50% 20%; }
+    .c-amethyst{ background: radial-gradient(circle at 30% 30%, #e879f9, #9333ea, #3b0764); border-radius: 20% 50%; }
+    .c-diamond { background: radial-gradient(circle at 30% 30%, #ffffff, #94a3b8, #1e293b); clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); }
+
+    /* Popup Modals (Ad, Level Win, Game Over) */
+    .modal-overlay {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.92);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      border-radius: 14px;
+      text-align: center;
+      padding: 20px;
+    }
+    .modal-box {
+      background: #1e1b4b;
+      border: 2px solid #00f0ff;
+      padding: 22px;
+      border-radius: 16px;
+      width: 90%;
+      box-shadow: 0 0 25px rgba(0,240,255,0.4);
+    }
+    .btn-action {
+      background: linear-gradient(45deg, #00f0ff, #7000ff);
+      border: none;
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 25px;
+      font-weight: bold;
+      font-size: 15px;
+      margin-top: 15px;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0,240,255,0.3);
+    }
+    .btn-action:active { transform: scale(0.95); }
+
+    .pop-text {
+      position: absolute;
+      font-size: 26px;
+      font-weight: bold;
+      color: #00f0ff;
+      text-shadow: 0 0 10px #ff007f, 2px 2px 4px #000;
+      pointer-events: none;
+      animation: floatUp 0.7s ease-out forwards;
+      z-index: 10;
+    }
+    @keyframes floatUp {
+      0% { transform: translateY(0) scale(0.5); opacity: 1; }
+      100% { transform: translateY(-40px) scale(1.2); opacity: 0; }
+    }
+    .particles {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="top-bar">
+    <div style="font-size: 15px; font-weight: bold; letter-spacing: 1px;">💎 CRYSTAL SAGA</div>
+    <button class="reward-btn" onclick="openAd()">🎁 +10 Moves (Ad)</button>
+  </div>
+
+  <div class="hud">
+    <div class="hud-card">
+      <div class="hud-title">Level</div>
+      <div class="hud-val" id="level" style="color: #ffd166;">1</div>
+    </div>
+    <div class="hud-card">
+      <div class="hud-title">Target</div>
+      <div class="hud-val" id="target">1200</div>
+    </div>
+    <div class="hud-card">
+      <div class="hud-title">Score</div>
+      <div class="hud-val" id="score">0</div>
+    </div>
+    <div class="hud-card">
+      <div class="hud-title">Moves</div>
+      <div class="hud-val" id="moves" style="color: #ff6b8b;">25</div>
+    </div>
+  </div>
+
+  <div id="game-container">
+    <div class="grid" id="grid">
+      <canvas id="canvas" class="particles"></canvas>
+    </div>
+
+    <!-- Ad Modal -->
+    <div id="ad-modal" class="modal-overlay">
+      <div class="modal-box">
+        <h3 style="margin:0; color:#00f0ff;">Sponsored Ad</h3>
+        <p style="font-size: 13px; color:#cbd5e1; margin: 10px 0;">Watching video...</p>
+        <div id="ad-countdown" style="font-size: 32px; color: #ffd166; font-weight: bold; margin: 10px 0;">5</div>
+        <div id="ad-status" style="font-size: 14px; color: #4ade80;">Playing Ad...</div>
+      </div>
+    </div>
+
+    <!-- Win Modal -->
+    <div id="win-modal" class="modal-overlay">
+      <div class="modal-box">
+        <h2 style="margin:0; color:#ffd166;">🎉 LEVEL CLEARED!</h2>
+        <p style="font-size: 14px; color:#cbd5e1; margin-top: 8px;">Target achieved!</p>
+        <button class="btn-action" onclick="nextLevel()">NEXT LEVEL ➔</button>
+      </div>
+    </div>
+
+    <!-- Game Over Modal -->
+    <div id="over-modal" class="modal-overlay">
+      <div class="modal-box">
+        <h2 style="margin:0; color:#ff6b8b;">GAME OVER 😢</h2>
+        <p style="font-size: 13px; color:#cbd5e1; margin-top: 8px;">Out of moves!</p>
+        <button class="btn-action" onclick="openAd(true)" style="background: linear-gradient(45deg, #ffd166, #ff7b00); margin-bottom: 8px;">📺 Watch Ad for +5 Moves</button><br>
+        <button class="btn-action" onclick="restartLevel()" style="background: #334155;">🔄 Restart Level</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Audio Engine
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    let actx = null;
+
+    function initAudio() {
+      if (!actx) actx = new AudioContext();
+      if (actx.state === 'suspended') actx.resume();
+    }
+
+    function playCrystalSound(type, pitch = 1) {
+      if (!actx) return;
+      const t = actx.currentTime;
+      const osc = actx.createOscillator();
+      const gain = actx.createGain();
+      osc.connect(gain);
+      gain.connect(actx.destination);
+
+      if (type === 'swap') {
+        osc.frequency.setValueAtTime(1200, t);
+        osc.frequency.exponentialRampToValueAtTime(1800, t + 0.05);
+        gain.gain.setValueAtTime(0.1, t);
+        gain.gain.linearRampToValueAtTime(0, t + 0.05);
+        osc.start(t); osc.stop(t + 0.05);
+      } else if (type === 'chime') {
+        osc.type = 'triangle';
+        let freq = 1300 * pitch;
+        osc.frequency.setValueAtTime(freq, t);
+        osc.frequency.exponentialRampToValueAtTime(freq * 1.4, t + 0.15);
+        gain.gain.setValueAtTime(0.2, t);
+        gain.gain.linearRampToValueAtTime(0, t + 0.15);
+        osc.start(t); osc.stop(t + 0.15);
+      } else if (type === 'shatter') {
+        const buf = actx.createBuffer(1, actx.sampleRate * 0.2, actx.sampleRate);
+        const d = buf.getChannelData(0);
+        for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.exp(-i / (actx.sampleRate * 0.05));
+        const n = actx.createBufferSource();
+        n.buffer = buf;
+        const f = actx.createBiquadFilter();
+        f.type = 'bandpass';
+        f.frequency.setValueAtTime(3500, t);
+        n.connect(f); f.connect(gain);
+        gain.gain.setValueAtTime(0.25, t);
+        gain.gain.linearRampToValueAtTime(0, t + 0.2);
+        n.start(t); n.stop(t + 0.2);
+      }
+    }
+
+    // Particle FX
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = 352; canvas.height = 352;
+    let parts = [];
+
+    function emit(x, y, color) {
+      for (let i = 0; i < 10; i++) {
+        parts.push({
+          x, y,
+          vx: (Math.random() - 0.5) * 8,
+          vy: (Math.random() - 0.5) * 8,
+          size: Math.random() * 5 + 2,
+          c: color,
+          a: 1
+        });
+      }
+    }
+
+    function renderParts() {
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      for(let i=parts.length-1; i>=0; i--) {
+        let p = parts[i];
+        p.x += p.vx; p.y += p.vy; p.a -= 0.04;
+        ctx.globalAlpha = Math.max(0, p.a);
+        ctx.fillStyle = p.c;
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill();
+        if (p.a <= 0) parts.splice(i,1);
+      }
+      requestAnimationFrame(renderParts);
+    }
+    renderParts();
+
+    // Game Variables
+    let curLevel = 1;
+    let targetScore = 1200;
+    let score = 0;
+    let moves = 25;
+    let isGameOver = false;
+
+    const levelEl = document.getElementById('level');
+    const targetEl = document.getElementById('target');
+    const scoreEl = document.getElementById('score');
+    const movesEl = document.getElementById('moves');
+
+    const gems = ['c-ruby', 'c-amber', 'c-emerald', 'c-sapphire', 'c-amethyst', 'c-diamond'];
+    const gemColors = {
+      'c-ruby': '#ff6b8b', 'c-amber': '#ffd166', 'c-emerald': '#4ade80',
+      'c-sapphire': '#38bdf8', 'c-amethyst': '#e879f9', 'c-diamond': '#ffffff'
+    };
+
+    const grid = document.getElementById('grid');
+    const squares = [];
+    const width = 8;
+    let combo = 0;
+
+    function buildBoard() {
+      grid.innerHTML = '<canvas id="canvas" class="particles"></canvas>';
+      const c = document.getElementById('canvas');
+      c.width = 352; c.height = 352;
+      squares.length = 0;
+      for (let i = 0; i < width * width; i++) {
+        const sq = document.createElement('div');
+        let r = gems[Math.floor(Math.random() * gems.length)];
+        sq.setAttribute('id', i);
+        sq.className = 'candy ' + r;
+        grid.appendChild(sq);
+        squares.push(sq);
+      }
+      bindTouch();
+    }
+
+    function bindTouch() {
+      let sx, sy, sId;
+      squares.forEach(sq => {
+        sq.addEventListener('touchstart', e => {
+          if (isGameOver) return;
+          initAudio();
+          sx = e.touches[0].clientX;
+          sy = e.touches[0].clientY;
+          sId = parseInt(sq.id);
+        }, { passive: false });
+
+        sq.addEventListener('touchend', e => {
+          if (isGameOver || moves <= 0) return;
+          let ex = e.changedTouches[0].clientX;
+          let ey = e.changedTouches[0].clientY;
+          let dx = ex - sx; let dy = ey - sy;
+          if (Math.abs(dx) < 15 && Math.abs(dy) < 15) return;
+
+          let tId;
+          if (Math.abs(dx) > Math.abs(dy)) {
+            tId = dx > 0 ? sId + 1 : sId - 1;
+            if (dx > 0 && sId % width === width - 1) return;
+            if (dx < 0 && sId % width === 0) return;
+          } else {
+            tId = dy > 0 ? sId + width : sId - width;
+            if (dy > 0 && sId >= width * (width - 1)) return;
+            if (dy < 0 && sId < width) return;
+          }
+
+          if (tId >= 0 && tId < 64) {
+            playCrystalSound('swap');
+            swap(sId, tId);
+            moves--;
+            movesEl.innerText = moves;
+            checkGameState();
+          }
+        }, { passive: false });
+      });
+    }
+
+    function getG(sq) {
+      for (let g of gems) if (sq.classList.contains(g)) return g;
+      return '';
+    }
+    function setG(sq, g) {
+      sq.className = 'candy';
+      if (g) sq.classList.add(g);
+    }
+
+    function swap(id1, id2) {
+      let g1 = getG(squares[id1]);
+      let g2 = getG(squares[id2]);
+      setG(squares[id1], g2);
+      setG(squares[id2], g1);
+      combo = 0;
+      checkMatches();
+    }
+
+    function checkMatches() {
+      let matched = new Set();
+      for (let i = 0; i < 62; i++) {
+        let row = [i, i+1, i+2];
+        let g = getG(squares[i]);
+        if ([6,7,14,15,22,23,30,31,38,39,46,47,54,55].includes(i) || !g) continue;
+        if (row.every(idx => getG(squares[idx]) === g)) row.forEach(idx => matched.add(idx));
+      }
+      for (let i = 0; i < 48; i++) {
+        let col = [i, i+width, i+width*2];
+        let g = getG(squares[i]);
+        if (!g) continue;
+        if (col.every(idx => getG(squares[idx]) === g)) col.forEach(idx => matched.add(idx));
+      }
+
+      if (matched.size > 0) {
+        combo++;
+        if (matched.size >= 4) {
+          playCrystalSound('shatter');
+        } else {
+          playCrystalSound('chime', combo);
+        }
+
+        score += matched.size * 25 * combo;
+        scoreEl.innerText = score;
+
+        matched.forEach(idx => {
+          let sq = squares[idx];
+          let g = getG(sq);
+          let rect = sq.getBoundingClientRect();
+          let gr = grid.getBoundingClientRect();
+          emit(rect.left - gr.left + 22, rect.top - gr.top + 22, gemColors[g] || '#fff');
+          setG(sq, '');
+        });
+        checkGameState();
+      }
+    }
+
+    function drop() {
+      for (let i = 0; i < 56; i++) {
+        if (getG(squares[i + width]) === '') {
+          setG(squares[i + width], getG(squares[i]));
+          setG(squares[i], '');
+          if (i < 8 && getG(squares[i]) === '') {
+            setG(squares[i], gems[Math.floor(Math.random() * gems.length)]);
+          }
+        }
+      }
+      for (let i = 0; i < 8; i++) {
+        if (getG(squares[i]) === '') {
+          setG(squares[i], gems[Math.floor(Math.random() * gems.length)]);
+        }
+      }
+    }
+
+    function checkGameState() {
+      if (score >= targetScore && !isGameOver) {
+        isGameOver = true;
+        setTimeout(() => {
+          document.getElementById('win-modal').style.display = 'flex';
+        }, 500);
+      } else if (moves <= 0 && score < targetScore && !isGameOver) {
+        isGameOver = true;
+        setTimeout(() => {
+          document.getElementById('over-modal').style.display = 'flex';
+        }, 500);
+      }
+    }
+
+    function nextLevel() {
+      curLevel++;
+      targetScore += 800;
+      moves = 25;
+      score = 0;
+      isGameOver = false;
+      levelEl.innerText = curLevel;
+      targetEl.innerText = targetScore;
+      scoreEl.innerText = score;
+      movesEl.innerText = moves;
+      document.getElementById('win-modal').style.display = 'none';
+      buildBoard();
+    }
+
+    function restartLevel() {
+      moves = 25;
+      score = 0;
+      isGameOver = false;
+      scoreEl.innerText = score;
+      movesEl.innerText = moves;
+      document.getElementById('over-modal').style.display = 'none';
+      buildBoard();
+    }
+
+    function openAd(fromGameOver = false) {
+      initAudio();
+      document.getElementById('over-modal').style.display = 'none';
+      const modal = document.getElementById('ad-modal');
+      const countdownEl = document.getElementById('ad-countdown');
+      const statusEl = document.getElementById('ad-status');
+      modal.style.display = 'flex';
+      let timeLeft = 5;
+      countdownEl.innerText = timeLeft;
+      statusEl.innerText = "Playing Ad...";
+
+      let timer = setInterval(() => {
+        timeLeft--;
+        countdownEl.innerText = timeLeft;
+        if (timeLeft <= 0) {
+          clearInterval(timer);
+          let bonus = fromGameOver ? 5 : 10;
+          statusEl.innerText = `Reward Unlocked! +${bonus} Moves Added`;
+          moves += bonus;
+          movesEl.innerText = moves;
+          isGameOver = false;
+          setTimeout(() => {
+            modal.style.display = 'none';
+          }, 1000);
+        }
+      }, 1000);
+    }
+
+    setInterval(() => {
+      drop();
+      checkMatches();
+    }, 150);
+
+    document.addEventListener('DOMContentLoaded', () => {
+      buildBoard();
+    });
+  </script>
+</body>
+</html>
