@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Crystal Saga - 1v1 Turn Battle</title>
+  <title>Crystal Saga - HD Deluxe</title>
   <style>
     * {
       box-sizing: border-box;
@@ -14,7 +14,7 @@
     body {
       margin: 0;
       padding: 0;
-      background: radial-gradient(circle at 50% 20%, #1a0b2e, #05020a);
+      background: radial-gradient(circle at 50% 20%, #15002b, #080014, #000000);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -25,11 +25,22 @@
       overflow: hidden;
     }
 
-    /* Start Menu */
+    /* High Quality Ambient Glow */
+    .ambient-glow {
+      position: absolute;
+      width: 320px;
+      height: 320px;
+      background: radial-gradient(circle, rgba(0,240,255,0.15), rgba(255,0,128,0.08), transparent 70%);
+      pointer-events: none;
+      filter: blur(40px);
+      z-index: 1;
+    }
+
+    /* Start Menu Screen */
     #start-screen {
       position: absolute;
       top: 0; left: 0; width: 100%; height: 100%;
-      background: radial-gradient(circle at 50% 30%, rgba(42, 8, 69, 0.95), rgba(5, 2, 10, 0.98));
+      background: radial-gradient(circle at 50% 30%, rgba(35, 5, 60, 0.98), rgba(5, 0, 15, 0.99));
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -39,39 +50,84 @@
       padding: 20px;
     }
     .game-logo {
-      font-size: 38px;
+      font-size: 40px;
       font-weight: 900;
       background: linear-gradient(45deg, #00ffff, #ff007f, #ffd166);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      text-shadow: 0 0 30px rgba(0, 255, 255, 0.6);
+      filter: drop-shadow(0 0 25px rgba(0, 255, 255, 0.6));
       margin-bottom: 5px;
       letter-spacing: 2px;
     }
     .game-subtitle {
-      font-size: 13px;
-      color: #cbd5e1;
+      font-size: 12px;
+      color: #94a3b8;
       margin-bottom: 35px;
       letter-spacing: 2px;
       text-transform: uppercase;
     }
-    .play-btn {
-      background: linear-gradient(45deg, #00f0ff, #7000ff, #ff007f);
+    .menu-btn {
+      width: 250px;
       border: none;
       color: white;
-      padding: 15px 45px;
+      padding: 14px 20px;
       border-radius: 30px;
       font-weight: 900;
-      font-size: 18px;
+      font-size: 16px;
       cursor: pointer;
-      box-shadow: 0 0 25px rgba(0, 240, 255, 0.6);
       margin-bottom: 15px;
       letter-spacing: 1px;
+      transition: transform 0.1s;
     }
-    .play-btn:active { transform: scale(0.94); }
+    .btn-solo {
+      background: linear-gradient(45deg, #00f0ff, #7000ff);
+      box-shadow: 0 0 25px rgba(0, 240, 255, 0.5);
+    }
+    .btn-pvp {
+      background: linear-gradient(45deg, #ff007f, #ff7b00);
+      box-shadow: 0 0 25px rgba(255, 0, 127, 0.5);
+    }
+    .menu-btn:active { transform: scale(0.94); }
 
-    /* PvP Battle Header */
+    /* Game UI */
     #game-ui {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      z-index: 10;
+    }
+
+    #solo-hud {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .top-bar {
+      display: flex;
+      width: 360px;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .hud {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .hud-card {
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(0, 240, 255, 0.35);
+      padding: 6px 10px;
+      border-radius: 12px;
+      text-align: center;
+      min-width: 65px;
+      backdrop-filter: blur(10px);
+      box-shadow: inset 0 0 10px rgba(255,255,255,0.05);
+    }
+    .hud-title { font-size: 9px; text-transform: uppercase; color: #00ffff; font-weight: bold; }
+    .hud-val { font-size: 18px; font-weight: bold; }
+
+    #pvp-hud {
       display: none;
       flex-direction: column;
       align-items: center;
@@ -80,7 +136,7 @@
       display: flex;
       width: 360px;
       justify-content: space-between;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
       gap: 10px;
     }
     .player-card {
@@ -91,19 +147,20 @@
       padding: 8px 10px;
       text-align: center;
       transition: all 0.3s ease;
+      backdrop-filter: blur(8px);
     }
     .p1-active {
       border-color: #00f0ff;
       background: rgba(0, 240, 255, 0.15);
-      box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
+      box-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
     }
     .p2-active {
       border-color: #ff007f;
       background: rgba(255, 0, 127, 0.15);
-      box-shadow: 0 0 15px rgba(255, 0, 127, 0.4);
+      box-shadow: 0 0 20px rgba(255, 0, 127, 0.4);
     }
-    .player-name { font-size: 12px; font-weight: bold; text-transform: uppercase; }
-    .player-score { font-size: 22px; font-weight: 900; margin: 2px 0; }
+    .player-name { font-size: 11px; font-weight: bold; text-transform: uppercase; }
+    .player-score { font-size: 20px; font-weight: 900; margin: 2px 0; }
     .player-info { font-size: 11px; color: #cbd5e1; }
 
     .timer-badge {
@@ -111,10 +168,20 @@
       border: 1px solid #ffd166;
       color: #ffd166;
       font-weight: bold;
-      font-size: 14px;
-      padding: 4px 12px;
+      font-size: 13px;
+      padding: 3px 12px;
       border-radius: 15px;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
+    }
+
+    .home-icon-btn {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: white;
+      padding: 6px 12px;
+      border-radius: 15px;
+      font-size: 11px;
+      cursor: pointer;
     }
 
     #game-container {
@@ -127,12 +194,13 @@
       display: grid;
       grid-template-columns: repeat(8, 45px);
       grid-template-rows: repeat(8, 45px);
-      background: rgba(10, 2, 20, 0.9);
-      border: 2px solid rgba(255, 255, 255, 0.2);
-      border-radius: 18px;
-      box-shadow: 0 0 30px rgba(0,0,0,0.8);
+      background: rgba(10, 0, 25, 0.88);
+      border: 2px solid rgba(0, 240, 255, 0.4);
+      border-radius: 20px;
+      box-shadow: 0 0 35px rgba(0, 240, 255, 0.2), inset 0 0 25px rgba(0,0,0,0.9);
       position: relative;
       overflow: hidden;
+      backdrop-filter: blur(8px);
     }
 
     .candy {
@@ -142,24 +210,23 @@
       border-radius: 50%;
       cursor: pointer;
       position: relative;
-      box-shadow: inset -4px -4px 10px rgba(0,0,0,0.7), inset 4px 4px 10px rgba(255,255,255,0.85);
-      transition: transform 0.1s ease;
+      box-shadow: inset -4px -4px 10px rgba(0,0,0,0.7), inset 4px 4px 10px rgba(255,255,255,0.85), 0 4px 8px rgba(0,0,0,0.5);
+      transition: transform 0.12s ease;
     }
-    .candy:active { transform: scale(1.18); }
+    .candy:active { transform: scale(1.2); }
 
-    /* Gems */
-    .c-ruby   { background: radial-gradient(circle at 30% 30%, #ff85a2, #d60036, #40000e); }
-    .c-amber  { background: radial-gradient(circle at 30% 30%, #ffea85, #f3722c, #591600); border-radius: 10px; }
-    .c-emerald{ background: radial-gradient(circle at 30% 30%, #7effb2, #059669, #011f17); border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; }
-    .c-sapphire{ background: radial-gradient(circle at 30% 30%, #85dcff, #0284c7, #04192d); border-radius: 50% 20%; }
-    .c-amethyst{ background: radial-gradient(circle at 30% 30%, #f4b6ff, #9333ea, #240342); border-radius: 20% 50%; }
-    .c-diamond { background: radial-gradient(circle at 30% 30%, #ffffff, #94a3b8, #0f172a); clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); }
+    /* Ultra HD Faceted Crystal Colors */
+    .c-ruby    { background: radial-gradient(circle at 35% 30%, #ff9ebb, #e60045 60%, #4a0014); box-shadow: 0 0 10px rgba(230,0,69,0.5); }
+    .c-amber   { background: radial-gradient(circle at 35% 30%, #fff0a8, #ff8c00 60%, #612800); border-radius: 10px; box-shadow: 0 0 10px rgba(255,140,0,0.5); }
+    .c-emerald { background: radial-gradient(circle at 35% 30%, #9effcb, #00b359 60%, #00361a); border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; box-shadow: 0 0 10px rgba(0,179,89,0.5); }
+    .c-sapphire{ background: radial-gradient(circle at 35% 30%, #a8edff, #0088e8 60%, #002d59); border-radius: 50% 20%; box-shadow: 0 0 10px rgba(0,136,232,0.5); }
+    .c-amethyst{ background: radial-gradient(circle at 35% 30%, #fabdff, #aa00ff 60%, #350054); border-radius: 20% 50%; box-shadow: 0 0 10px rgba(170,0,255,0.5); }
+    .c-diamond { background: radial-gradient(circle at 35% 30%, #ffffff, #b8c4d6 60%, #1e293b); clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); box-shadow: 0 0 12px rgba(255,255,255,0.6); }
 
-    /* Match Over Modal */
     .modal-overlay {
       position: absolute;
       top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(5, 2, 10, 0.95);
+      background: rgba(5, 0, 15, 0.95);
       display: none;
       flex-direction: column;
       align-items: center;
@@ -170,18 +237,18 @@
       padding: 20px;
     }
     .modal-box {
-      background: #1e1b4b;
+      background: rgba(25, 10, 45, 0.95);
       border: 2px solid #00f0ff;
       padding: 24px;
       border-radius: 20px;
       width: 90%;
-      box-shadow: 0 0 30px rgba(0,240,255,0.4);
+      box-shadow: 0 0 35px rgba(0,240,255,0.4);
     }
     .btn-action {
       background: linear-gradient(45deg, #00f0ff, #7000ff);
       border: none;
       color: #fff;
-      padding: 12px 26px;
+      padding: 12px 24px;
       border-radius: 25px;
       font-weight: bold;
       font-size: 15px;
@@ -197,30 +264,62 @@
 </head>
 <body>
 
+  <div class="ambient-glow"></div>
+
   <!-- Start Screen -->
   <div id="start-screen">
-    <div class="game-logo">⚔️ CRYSTAL 1v1</div>
-    <div class="game-subtitle">Turn-Based PvP Battle</div>
-    <button class="play-btn" onclick="startBattle()">START 1v1 MATCH</button>
+    <div class="game-logo">💎 CRYSTAL SAGA HD</div>
+    <div class="game-subtitle">Deluxe Crystal Edition</div>
+    <button class="menu-btn btn-solo" onclick="startSoloGame()">🌟 SOLO ADVENTURE</button>
+    <button class="menu-btn btn-pvp" onclick="startPvpBattle()">⚔️ 1v1 BATTLE (60s)</button>
   </div>
 
   <!-- Game UI -->
   <div id="game-ui">
-    <div class="pvp-header">
-      <div id="p1-card" class="player-card p1-active">
-        <div class="player-name" style="color: #00f0ff;">Player 1 (You)</div>
-        <div class="player-score" id="p1-score">0</div>
-        <div class="player-info">Moves: <span id="p1-moves">15</span></div>
+    <div id="solo-hud">
+      <div class="top-bar">
+        <button class="home-icon-btn" onclick="goHome()">🏠 Menu</button>
+        <div style="font-size: 14px; font-weight: bold; color: #00ffff;">💎 SOLO MODE</div>
+        <button class="home-icon-btn" onclick="openAd()" style="background: linear-gradient(45deg, #ff007f, #7000ff);">🎁 +10 Moves</button>
       </div>
-      <div id="p2-card" class="player-card">
-        <div class="player-name" style="color: #ff007f;">Player 2 (Opponent)</div>
-        <div class="player-score" id="p2-score">0</div>
-        <div class="player-info">Moves: <span id="p2-moves">15</span></div>
+      <div class="hud">
+        <div class="hud-card">
+          <div class="hud-title">Level</div>
+          <div class="hud-val" id="level" style="color: #ffd166;">1</div>
+        </div>
+        <div class="hud-card">
+          <div class="hud-title">Target</div>
+          <div class="hud-val" id="target">1200</div>
+        </div>
+        <div class="hud-card">
+          <div class="hud-title">Score</div>
+          <div class="hud-val" id="score">0</div>
+        </div>
+        <div class="hud-card">
+          <div class="hud-title">Moves</div>
+          <div class="hud-val" id="moves" style="color: #ff6b8b;">25</div>
+        </div>
       </div>
     </div>
 
-    <div class="timer-badge">
-      ⏱️ Turn Time: <span id="timer-val">60</span>s
+    <div id="pvp-hud">
+      <div class="top-bar">
+        <button class="home-icon-btn" onclick="goHome()">🏠 Menu</button>
+        <div class="timer-badge">⏱️ Turn: <span id="timer-val">60</span>s</div>
+        <div style="width: 50px;"></div>
+      </div>
+      <div class="pvp-header">
+        <div id="p1-card" class="player-card p1-active">
+          <div class="player-name" style="color: #00f0ff;">Player 1 (You)</div>
+          <div class="player-score" id="p1-score">0</div>
+          <div class="player-info">Moves: <span id="p1-moves">15</span></div>
+        </div>
+        <div id="p2-card" class="player-card">
+          <div class="player-name" style="color: #ff007f;">Player 2 (Opponent)</div>
+          <div class="player-score" id="p2-score">0</div>
+          <div class="player-info">Moves: <span id="p2-moves">15</span></div>
+        </div>
+      </div>
     </div>
 
     <div id="game-container">
@@ -228,12 +327,36 @@
         <canvas id="canvas" class="particles"></canvas>
       </div>
 
-      <!-- Result Modal -->
-      <div id="result-modal" class="modal-overlay">
+      <div id="win-modal" class="modal-overlay">
+        <div class="modal-box">
+          <h2 style="margin:0; color:#ffd166;">🎉 LEVEL CLEARED!</h2>
+          <p style="font-size: 14px; color:#cbd5e1; margin-top: 8px;">Target achieved!</p>
+          <button class="btn-action" onclick="nextLevel()">NEXT LEVEL ➔</button>
+        </div>
+      </div>
+
+      <div id="over-modal" class="modal-overlay">
+        <div class="modal-box">
+          <h2 style="margin:0; color:#ff6b8b;">GAME OVER 😢</h2>
+          <p style="font-size: 13px; color:#cbd5e1; margin-top: 8px;">Out of moves!</p>
+          <button class="btn-action" onclick="restartSoloLevel()" style="background: #334155;">🔄 Try Again</button>
+        </div>
+      </div>
+
+      <div id="pvp-result-modal" class="modal-overlay">
         <div class="modal-box">
           <h2 id="winner-title" style="margin:0; color:#ffd166;">🏆 MATCH OVER</h2>
           <p id="winner-desc" style="font-size: 14px; color:#cbd5e1; margin-top: 8px;">Player 1 Won!</p>
-          <button class="btn-action" onclick="resetBattle()">PLAY AGAIN 🔄</button>
+          <button class="btn-action" onclick="startPvpBattle()">PLAY AGAIN 🔄</button>
+        </div>
+      </div>
+
+      <div id="ad-modal" class="modal-overlay">
+        <div class="modal-box">
+          <h3 style="margin:0; color:#00ffff;">Sponsored Ad</h3>
+          <p style="font-size: 13px; color:#cbd5e1; margin-top: 10px;">Watching video...</p>
+          <div id="ad-countdown" style="font-size: 32px; color: #ffd166; font-weight: bold; margin: 10px 0;">5</div>
+          <div id="ad-status" style="font-size: 14px; color: #4ade80;">Playing Ad...</div>
         </div>
       </div>
     </div>
@@ -258,21 +381,21 @@
 
       if (type === 'swap') {
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(1400, t);
-        osc.frequency.exponentialRampToValueAtTime(2000, t + 0.04);
+        osc.frequency.setValueAtTime(1500, t);
+        osc.frequency.exponentialRampToValueAtTime(2200, t + 0.04);
         gain.gain.setValueAtTime(0.08, t);
         gain.gain.linearRampToValueAtTime(0, t + 0.04);
         osc.start(t); osc.stop(t + 0.04);
       } else if (type === 'chime') {
         osc.type = 'triangle';
-        let freq = 1600 * pitch;
+        let freq = 1700 * pitch;
         osc.frequency.setValueAtTime(freq, t);
         osc.frequency.exponentialRampToValueAtTime(freq * 1.5, t + 0.12);
-        gain.gain.setValueAtTime(0.18, t);
+        gain.gain.setValueAtTime(0.2, t);
         gain.gain.linearRampToValueAtTime(0, t + 0.12);
         osc.start(t); osc.stop(t + 0.12);
       } else if (type === 'shatter') {
-        const bufferSize = actx.sampleRate * 0.22;
+        const bufferSize = actx.sampleRate * 0.25;
         const buf = actx.createBuffer(1, bufferSize, actx.sampleRate);
         const d = buf.getChannelData(0);
         for (let i = 0; i < bufferSize; i++) d[i] = (Math.random() * 2 - 1) * Math.exp(-i / (actx.sampleRate * 0.06));
@@ -280,22 +403,20 @@
         noise.buffer = buf;
         const filter = actx.createBiquadFilter();
         filter.type = 'bandpass';
-        filter.frequency.setValueAtTime(4500, t);
-        noise.connect(filter);
-        filter.connect(gain);
-        gain.gain.setValueAtTime(0.3, t);
-        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.22);
-        noise.start(t); noise.stop(t + 0.22);
+        filter.frequency.setValueAtTime(4800, t);
+        noise.connect(filter); filter.connect(gain);
+        gain.gain.setValueAtTime(0.35, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
+        noise.start(t); noise.stop(t + 0.25);
       }
     }
 
-    // PvP Variables
-    let activePlayer = 1; // 1 or 2
-    let p1Score = 0, p2Score = 0;
-    let p1Moves = 15, p2Moves = 15;
-    let turnTime = 60;
-    let turnInterval = null;
+    let gameMode = 'solo';
     let isGameOver = false;
+
+    let curLevel = 1, targetScore = 1200, soloScore = 0, soloMoves = 25;
+    let activePlayer = 1, p1Score = 0, p2Score = 0, p1Moves = 15, p2Moves = 15;
+    let turnTime = 60, turnInterval = null;
 
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
@@ -303,12 +424,12 @@
     let parts = [];
 
     function emit(x, y, color) {
-      for (let i = 0; i < 10; i++) {
+      for (let i = 0; i < 12; i++) {
         parts.push({
           x, y,
-          vx: (Math.random() - 0.5) * 8,
-          vy: (Math.random() - 0.5) * 8,
-          size: Math.random() * 4 + 2,
+          vx: (Math.random() - 0.5) * 10,
+          vy: (Math.random() - 0.5) * 10,
+          size: Math.random() * 5 + 2,
           c: color,
           a: 1
         });
@@ -331,8 +452,8 @@
 
     const gems = ['c-ruby', 'c-amber', 'c-emerald', 'c-sapphire', 'c-amethyst', 'c-diamond'];
     const gemColors = {
-      'c-ruby': '#ff85a2', 'c-amber': '#ffea85', 'c-emerald': '#7effb2',
-      'c-sapphire': '#85dcff', 'c-amethyst': '#f4b6ff', 'c-diamond': '#ffffff'
+      'c-ruby': '#ff9ebb', 'c-amber': '#fff0a8', 'c-emerald': '#9effcb',
+      'c-sapphire': '#a8edff', 'c-amethyst': '#fabdff', 'c-diamond': '#ffffff'
     };
 
     const grid = document.getElementById('grid');
@@ -340,10 +461,48 @@
     const width = 8;
     let combo = 0;
 
-    function startBattle() {
+    function goHome() {
+      clearInterval(turnInterval);
+      document.getElementById('game-ui').style.display = 'none';
+      document.getElementById('start-screen').style.display = 'flex';
+      document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none');
+    }
+
+    function startSoloGame() {
       initAudio();
+      gameMode = 'solo';
+      isGameOver = false;
       document.getElementById('start-screen').style.display = 'none';
       document.getElementById('game-ui').style.display = 'flex';
+      document.getElementById('solo-hud').style.display = 'flex';
+      document.getElementById('pvp-hud').style.display = 'none';
+      
+      soloScore = 0; soloMoves = 25;
+      document.getElementById('score').innerText = soloScore;
+      document.getElementById('moves').innerText = soloMoves;
+      buildBoard();
+    }
+
+    function startPvpBattle() {
+      initAudio();
+      gameMode = 'pvp';
+      isGameOver = false;
+      document.getElementById('start-screen').style.display = 'none';
+      document.getElementById('game-ui').style.display = 'flex';
+      document.getElementById('solo-hud').style.display = 'none';
+      document.getElementById('pvp-hud').style.display = 'flex';
+      document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none');
+
+      p1Score = 0; p2Score = 0;
+      p1Moves = 15; p2Moves = 15;
+      activePlayer = 1;
+      document.getElementById('p1-score').innerText = 0;
+      document.getElementById('p2-score').innerText = 0;
+      document.getElementById('p1-moves').innerText = 15;
+      document.getElementById('p2-moves').innerText = 15;
+      document.getElementById('p1-card').classList.add('p1-active');
+      document.getElementById('p2-card').classList.remove('p2-active');
+
       buildBoard();
       startTurnTimer();
     }
@@ -373,12 +532,12 @@
         turnTime--;
         document.getElementById('timer-val').innerText = turnTime;
         if (turnTime <= 0) {
-          switchTurn(); // 60s timeout = turn switch
+          switchPvpTurn();
         }
       }, 1000);
     }
 
-    function switchTurn() {
+    function switchPvpTurn() {
       if (activePlayer === 1) {
         p1Moves--;
         document.getElementById('p1-moves').innerText = Math.max(0, p1Moves);
@@ -394,7 +553,7 @@
       }
 
       if (p1Moves <= 0 && p2Moves <= 0) {
-        endBattle();
+        endPvpBattle();
       } else {
         startTurnTimer();
       }
@@ -412,6 +571,7 @@
 
         sq.addEventListener('touchend', e => {
           if (isGameOver) return;
+          if (gameMode === 'solo' && soloMoves <= 0) return;
           let ex = e.changedTouches[0].clientX;
           let ey = e.changedTouches[0].clientY;
           let dx = ex - sx; let dy = ey - sy;
@@ -431,7 +591,13 @@
           if (tId >= 0 && tId < 64) {
             playGlassSound('swap');
             swap(sId, tId);
-            setTimeout(switchTurn, 400);
+            if (gameMode === 'solo') {
+              soloMoves--;
+              document.getElementById('moves').innerText = soloMoves;
+              checkSoloState();
+            } else {
+              setTimeout(switchPvpTurn, 400);
+            }
           }
         }, { passive: false });
       });
@@ -479,12 +645,18 @@
         }
 
         let pts = matched.size * 30 * combo;
-        if (activePlayer === 1) {
-          p1Score += pts;
-          document.getElementById('p1-score').innerText = p1Score;
+        if (gameMode === 'solo') {
+          soloScore += pts;
+          document.getElementById('score').innerText = soloScore;
+          checkSoloState();
         } else {
-          p2Score += pts;
-          document.getElementById('p2-score').innerText = p2Score;
+          if (activePlayer === 1) {
+            p1Score += pts;
+            document.getElementById('p1-score').innerText = p1Score;
+          } else {
+            p2Score += pts;
+            document.getElementById('p2-score').innerText = p2Score;
+          }
         }
 
         matched.forEach(idx => {
@@ -515,10 +687,38 @@
       }
     }
 
-    function endBattle() {
+    function checkSoloState() {
+      if (soloScore >= targetScore && !isGameOver) {
+        isGameOver = true;
+        setTimeout(() => { document.getElementById('win-modal').style.display = 'flex'; }, 500);
+      } else if (soloMoves <= 0 && soloScore < targetScore && !isGameOver) {
+        isGameOver = true;
+        setTimeout(() => { document.getElementById('over-modal').style.display = 'flex'; }, 500);
+      }
+    }
+
+    function nextLevel() {
+      curLevel++; targetScore += 800; soloMoves = 25; soloScore = 0; isGameOver = false;
+      document.getElementById('level').innerText = curLevel;
+      document.getElementById('target').innerText = targetScore;
+      document.getElementById('score').innerText = soloScore;
+      document.getElementById('moves').innerText = soloMoves;
+      document.getElementById('win-modal').style.display = 'none';
+      buildBoard();
+    }
+
+    function restartSoloLevel() {
+      soloMoves = 25; soloScore = 0; isGameOver = false;
+      document.getElementById('score').innerText = soloScore;
+      document.getElementById('moves').innerText = soloMoves;
+      document.getElementById('over-modal').style.display = 'none';
+      buildBoard();
+    }
+
+    function endPvpBattle() {
       isGameOver = true;
       clearInterval(turnInterval);
-      const modal = document.getElementById('result-modal');
+      const modal = document.getElementById('pvp-result-modal');
       const title = document.getElementById('winner-title');
       const desc = document.getElementById('winner-desc');
 
@@ -538,20 +738,27 @@
       modal.style.display = 'flex';
     }
 
-    function resetBattle() {
-      p1Score = 0; p2Score = 0;
-      p1Moves = 15; p2Moves = 15;
-      activePlayer = 1;
-      isGameOver = false;
-      document.getElementById('p1-score').innerText = 0;
-      document.getElementById('p2-score').innerText = 0;
-      document.getElementById('p1-moves').innerText = 15;
-      document.getElementById('p2-moves').innerText = 15;
-      document.getElementById('p1-card').classList.add('p1-active');
-      document.getElementById('p2-card').classList.remove('p2-active');
-      document.getElementById('result-modal').style.display = 'none';
-      buildBoard();
-      startTurnTimer();
+    function openAd() {
+      initAudio();
+      const modal = document.getElementById('ad-modal');
+      const countdownEl = document.getElementById('ad-countdown');
+      const statusEl = document.getElementById('ad-status');
+      modal.style.display = 'flex';
+      let timeLeft = 5;
+      countdownEl.innerText = timeLeft;
+      statusEl.innerText = "Playing Ad...";
+
+      let timer = setInterval(() => {
+        timeLeft--;
+        countdownEl.innerText = timeLeft;
+        if (timeLeft <= 0) {
+          clearInterval(timer);
+          statusEl.innerText = `Reward Unlocked! +10 Moves Added`;
+          soloMoves += 10;
+          document.getElementById('moves').innerText = soloMoves;
+          setTimeout(() => { modal.style.display = 'none'; }, 1000);
+        }
+      }, 1000);
     }
 
     setInterval(() => {
