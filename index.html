@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Crystal Saga Pro</title>
+  <title>Crystal Saga - Ultimate Glass Edition</title>
   <style>
     * {
       box-sizing: border-box;
@@ -14,7 +14,7 @@
     body {
       margin: 0;
       padding: 0;
-      background: radial-gradient(circle at 50% 20%, #1a0b2e, #05020a);
+      background: linear-gradient(135deg, #0f051d, #1a0b2e, #05020a);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -24,40 +24,95 @@
       color: #fff;
       overflow: hidden;
     }
+
+    /* Start Screen / Unique Glass Menu */
+    #start-screen {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: radial-gradient(circle at 50% 30%, rgba(42, 8, 69, 0.9), rgba(5, 2, 10, 0.95));
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      text-align: center;
+      padding: 20px;
+      backdrop-filter: blur(10px);
+    }
+    .game-logo {
+      font-size: 42px;
+      font-weight: 900;
+      background: linear-gradient(45deg, #00ffff, #ff007f, #ffd166);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 35px rgba(0, 255, 255, 0.6);
+      margin-bottom: 8px;
+      letter-spacing: 3px;
+    }
+    .game-subtitle {
+      font-size: 13px;
+      color: #cbd5e1;
+      margin-bottom: 45px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+    .play-btn {
+      background: linear-gradient(45deg, #00f0ff, #7000ff, #ff007f);
+      background-size: 200% auto;
+      border: none;
+      color: white;
+      padding: 16px 55px;
+      border-radius: 35px;
+      font-weight: 900;
+      font-size: 20px;
+      cursor: pointer;
+      box-shadow: 0 0 30px rgba(0, 240, 255, 0.7), inset 0 0 10px rgba(255,255,255,0.5);
+      transition: all 0.2s ease;
+      letter-spacing: 2px;
+    }
+    .play-btn:active { transform: scale(0.92); box-shadow: 0 0 15px rgba(0, 240, 255, 0.4); }
+
+    /* Game UI */
+    #game-ui {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+    }
     .top-bar {
       display: flex;
-      width: 352px;
+      width: 360px;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
     }
     .hud {
       display: flex;
       gap: 8px;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
     }
     .hud-card {
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(0, 240, 255, 0.3);
       padding: 6px 10px;
-      border-radius: 12px;
+      border-radius: 14px;
       text-align: center;
-      min-width: 65px;
-      backdrop-filter: blur(5px);
+      min-width: 70px;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
     }
-    .hud-title { font-size: 10px; text-transform: uppercase; color: #00f0ff; font-weight: bold; }
+    .hud-title { font-size: 9px; text-transform: uppercase; color: #00ffff; font-weight: bold; letter-spacing: 1px; }
     .hud-val { font-size: 18px; font-weight: bold; }
 
     .reward-btn {
-      background: linear-gradient(45deg, #00f0ff, #7000ff);
-      border: none;
+      background: linear-gradient(45deg, #ff007f, #7000ff);
+      border: 1px solid rgba(255,255,255,0.3);
       color: white;
-      padding: 7px 12px;
+      padding: 8px 14px;
       border-radius: 20px;
       font-weight: bold;
       font-size: 11px;
       cursor: pointer;
-      box-shadow: 0 4px 15px rgba(0, 240, 255, 0.4);
+      box-shadow: 0 4px 15px rgba(255, 0, 127, 0.4);
     }
     .reward-btn:active { transform: scale(0.95); }
 
@@ -66,89 +121,76 @@
     }
 
     .grid {
-      width: 352px;
-      height: 352px;
+      width: 360px;
+      height: 360px;
       display: grid;
-      grid-template-columns: repeat(8, 44px);
-      grid-template-rows: repeat(8, 44px);
-      background: rgba(10, 2, 20, 0.95);
-      border: 3px solid #00f0ff;
-      border-radius: 16px;
-      box-shadow: 0 0 25px rgba(0, 240, 255, 0.3), inset 0 0 15px rgba(0,0,0,0.8);
+      grid-template-columns: repeat(8, 45px);
+      grid-template-rows: repeat(8, 45px);
+      background: rgba(10, 2, 20, 0.85);
+      border: 2px solid rgba(0, 240, 255, 0.5);
+      border-radius: 20px;
+      box-shadow: 0 0 35px rgba(0, 240, 255, 0.25), inset 0 0 20px rgba(0,0,0,0.9);
       position: relative;
       overflow: hidden;
+      backdrop-filter: blur(5px);
     }
 
     .candy {
-      width: 38px;
-      height: 38px;
+      width: 39px;
+      height: 39px;
       margin: 3px;
       border-radius: 50%;
       cursor: pointer;
       position: relative;
-      box-shadow: inset -3px -3px 8px rgba(0,0,0,0.6), inset 3px 3px 8px rgba(255,255,255,0.8), 0 3px 6px rgba(0,0,0,0.4);
+      box-shadow: inset -4px -4px 10px rgba(0,0,0,0.7), inset 4px 4px 10px rgba(255,255,255,0.85), 0 4px 8px rgba(0,0,0,0.5);
       transition: transform 0.1s ease;
     }
-    .candy:active { transform: scale(1.15); }
+    .candy:active { transform: scale(1.18); }
 
-    /* Gem Themes */
-    .c-ruby   { background: radial-gradient(circle at 30% 30%, #ff6b8b, #d60036, #590014); }
-    .c-amber  { background: radial-gradient(circle at 30% 30%, #ffd166, #f3722c, #802000); border-radius: 8px; }
-    .c-emerald{ background: radial-gradient(circle at 30% 30%, #4ade80, #059669, #022c22); border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; }
-    .c-sapphire{ background: radial-gradient(circle at 30% 30%, #38bdf8, #0284c7, #082f49); border-radius: 50% 20%; }
-    .c-amethyst{ background: radial-gradient(circle at 30% 30%, #e879f9, #9333ea, #3b0764); border-radius: 20% 50%; }
-    .c-diamond { background: radial-gradient(circle at 30% 30%, #ffffff, #94a3b8, #1e293b); clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); }
+    /* Unique Crystal Gem Themes with Glass Shimmer */
+    .c-ruby   { background: radial-gradient(circle at 30% 30%, #ff85a2, #d60036, #40000e); }
+    .c-amber  { background: radial-gradient(circle at 30% 30%, #ffea85, #f3722c, #591600); border-radius: 10px; }
+    .c-emerald{ background: radial-gradient(circle at 30% 30%, #7effb2, #059669, #011f17); border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; }
+    .c-sapphire{ background: radial-gradient(circle at 30% 30%, #85dcff, #0284c7, #04192d); border-radius: 50% 20%; }
+    .c-amethyst{ background: radial-gradient(circle at 30% 30%, #f4b6ff, #9333ea, #240342); border-radius: 20% 50%; }
+    .c-diamond { background: radial-gradient(circle at 30% 30%, #ffffff, #94a3b8, #0f172a); clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); }
 
-    /* Popup Modals (Ad, Level Win, Game Over) */
+    /* Modals */
     .modal-overlay {
       position: absolute;
       top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.92);
+      background: rgba(5, 2, 10, 0.92);
       display: none;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       z-index: 100;
-      border-radius: 14px;
+      border-radius: 18px;
       text-align: center;
       padding: 20px;
+      backdrop-filter: blur(10px);
     }
     .modal-box {
-      background: #1e1b4b;
-      border: 2px solid #00f0ff;
-      padding: 22px;
-      border-radius: 16px;
+      background: rgba(30, 27, 75, 0.9);
+      border: 2px solid rgba(0, 240, 255, 0.6);
+      padding: 24px;
+      border-radius: 20px;
       width: 90%;
-      box-shadow: 0 0 25px rgba(0,240,255,0.4);
+      box-shadow: 0 0 30px rgba(0,240,255,0.4);
     }
     .btn-action {
       background: linear-gradient(45deg, #00f0ff, #7000ff);
       border: none;
       color: #fff;
-      padding: 10px 20px;
+      padding: 12px 24px;
       border-radius: 25px;
       font-weight: bold;
       font-size: 15px;
       margin-top: 15px;
       cursor: pointer;
-      box-shadow: 0 4px 15px rgba(0,240,255,0.3);
+      box-shadow: 0 4px 20px rgba(0,240,255,0.4);
     }
     .btn-action:active { transform: scale(0.95); }
-
-    .pop-text {
-      position: absolute;
-      font-size: 26px;
-      font-weight: bold;
-      color: #00f0ff;
-      text-shadow: 0 0 10px #ff007f, 2px 2px 4px #000;
-      pointer-events: none;
-      animation: floatUp 0.7s ease-out forwards;
-      z-index: 10;
-    }
-    @keyframes floatUp {
-      0% { transform: translateY(0) scale(0.5); opacity: 1; }
-      100% { transform: translateY(-40px) scale(1.2); opacity: 0; }
-    }
     .particles {
       position: absolute;
       top: 0; left: 0; width: 100%; height: 100%;
@@ -158,67 +200,77 @@
 </head>
 <body>
 
-  <div class="top-bar">
-    <div style="font-size: 15px; font-weight: bold; letter-spacing: 1px;">💎 CRYSTAL SAGA</div>
-    <button class="reward-btn" onclick="openAd()">🎁 +10 Moves (Ad)</button>
+  <!-- Start Menu Screen -->
+  <div id="start-screen">
+    <div class="game-logo">💎 CRYSTAL SAGA</div>
+    <div class="game-subtitle">Glass & Crystal Match Adventure</div>
+    <button class="play-btn" onclick="startGame()">PLAY GAME</button>
   </div>
 
-  <div class="hud">
-    <div class="hud-card">
-      <div class="hud-title">Level</div>
-      <div class="hud-val" id="level" style="color: #ffd166;">1</div>
-    </div>
-    <div class="hud-card">
-      <div class="hud-title">Target</div>
-      <div class="hud-val" id="target">1200</div>
-    </div>
-    <div class="hud-card">
-      <div class="hud-title">Score</div>
-      <div class="hud-val" id="score">0</div>
-    </div>
-    <div class="hud-card">
-      <div class="hud-title">Moves</div>
-      <div class="hud-val" id="moves" style="color: #ff6b8b;">25</div>
-    </div>
-  </div>
-
-  <div id="game-container">
-    <div class="grid" id="grid">
-      <canvas id="canvas" class="particles"></canvas>
+  <!-- Main Game UI -->
+  <div id="game-ui">
+    <div class="top-bar">
+      <div style="font-size: 14px; font-weight: bold; letter-spacing: 1px; color: #00ffff;">💎 CRYSTAL SAGA</div>
+      <button class="reward-btn" onclick="openAd()">🎁 +10 Moves</button>
     </div>
 
-    <!-- Ad Modal -->
-    <div id="ad-modal" class="modal-overlay">
-      <div class="modal-box">
-        <h3 style="margin:0; color:#00f0ff;">Sponsored Ad</h3>
-        <p style="font-size: 13px; color:#cbd5e1; margin: 10px 0;">Watching video...</p>
-        <div id="ad-countdown" style="font-size: 32px; color: #ffd166; font-weight: bold; margin: 10px 0;">5</div>
-        <div id="ad-status" style="font-size: 14px; color: #4ade80;">Playing Ad...</div>
+    <div class="hud">
+      <div class="hud-card">
+        <div class="hud-title">Level</div>
+        <div class="hud-val" id="level" style="color: #ffd166;">1</div>
+      </div>
+      <div class="hud-card">
+        <div class="hud-title">Target</div>
+        <div class="hud-val" id="target">1200</div>
+      </div>
+      <div class="hud-card">
+        <div class="hud-title">Score</div>
+        <div class="hud-val" id="score">0</div>
+      </div>
+      <div class="hud-card">
+        <div class="hud-title">Moves</div>
+        <div class="hud-val" id="moves" style="color: #ff6b8b;">25</div>
       </div>
     </div>
 
-    <!-- Win Modal -->
-    <div id="win-modal" class="modal-overlay">
-      <div class="modal-box">
-        <h2 style="margin:0; color:#ffd166;">🎉 LEVEL CLEARED!</h2>
-        <p style="font-size: 14px; color:#cbd5e1; margin-top: 8px;">Target achieved!</p>
-        <button class="btn-action" onclick="nextLevel()">NEXT LEVEL ➔</button>
+    <div id="game-container">
+      <div class="grid" id="grid">
+        <canvas id="canvas" class="particles"></canvas>
       </div>
-    </div>
 
-    <!-- Game Over Modal -->
-    <div id="over-modal" class="modal-overlay">
-      <div class="modal-box">
-        <h2 style="margin:0; color:#ff6b8b;">GAME OVER 😢</h2>
-        <p style="font-size: 13px; color:#cbd5e1; margin-top: 8px;">Out of moves!</p>
-        <button class="btn-action" onclick="openAd(true)" style="background: linear-gradient(45deg, #ffd166, #ff7b00); margin-bottom: 8px;">📺 Watch Ad for +5 Moves</button><br>
-        <button class="btn-action" onclick="restartLevel()" style="background: #334155;">🔄 Restart Level</button>
+      <!-- Ad Modal -->
+      <div id="ad-modal" class="modal-overlay">
+        <div class="modal-box">
+          <h3 style="margin:0; color:#00ffff;">Sponsored Ad</h3>
+          <p style="font-size: 13px; color:#cbd5e1; margin: 10px 0;">Watching video...</p>
+          <div id="ad-countdown" style="font-size: 32px; color: #ffd166; font-weight: bold; margin: 10px 0;">5</div>
+          <div id="ad-status" style="font-size: 14px; color: #4ade80;">Playing Ad...</div>
+        </div>
+      </div>
+
+      <!-- Win Modal -->
+      <div id="win-modal" class="modal-overlay">
+        <div class="modal-box">
+          <h2 style="margin:0; color:#ffd166;">🎉 LEVEL CLEARED!</h2>
+          <p style="font-size: 14px; color:#cbd5e1; margin-top: 8px;">Target achieved!</p>
+          <button class="btn-action" onclick="nextLevel()">NEXT LEVEL ➔</button>
+        </div>
+      </div>
+
+      <!-- Game Over Modal -->
+      <div id="over-modal" class="modal-overlay">
+        <div class="modal-box">
+          <h2 style="margin:0; color:#ff6b8b;">GAME OVER 😢</h2>
+          <p style="font-size: 13px; color:#cbd5e1; margin-top: 8px;">Out of moves!</p>
+          <button class="btn-action" onclick="openAd(true)" style="background: linear-gradient(45deg, #ffd166, #ff7b00); margin-bottom: 8px;">📺 Watch Ad for +5 Moves</button><br>
+          <button class="btn-action" onclick="restartLevel()" style="background: #334155;">🔄 Restart Level</button>
+        </div>
       </div>
     </div>
   </div>
 
   <script>
-    // Audio Engine
+    // Audio Engine for Crystal Glass Tinks & Shatter
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     let actx = null;
 
@@ -227,57 +279,79 @@
       if (actx.state === 'suspended') actx.resume();
     }
 
-    function playCrystalSound(type, pitch = 1) {
+    function playGlassSound(type, pitchMultiplier = 1) {
       if (!actx) return;
       const t = actx.currentTime;
       const osc = actx.createOscillator();
       const gain = actx.createGain();
+      
       osc.connect(gain);
       gain.connect(actx.destination);
 
       if (type === 'swap') {
-        osc.frequency.setValueAtTime(1200, t);
-        osc.frequency.exponentialRampToValueAtTime(1800, t + 0.05);
-        gain.gain.setValueAtTime(0.1, t);
-        gain.gain.linearRampToValueAtTime(0, t + 0.05);
-        osc.start(t); osc.stop(t + 0.05);
+        // Soft crystal tick
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(1400, t);
+        osc.frequency.exponentialRampToValueAtTime(2000, t + 0.04);
+        gain.gain.setValueAtTime(0.08, t);
+        gain.gain.linearRampToValueAtTime(0, t + 0.04);
+        osc.start(t); osc.stop(t + 0.04);
       } else if (type === 'chime') {
+        // High crystal glass tink on match
         osc.type = 'triangle';
-        let freq = 1300 * pitch;
+        let freq = 1600 * pitchMultiplier;
         osc.frequency.setValueAtTime(freq, t);
-        osc.frequency.exponentialRampToValueAtTime(freq * 1.4, t + 0.15);
-        gain.gain.setValueAtTime(0.2, t);
-        gain.gain.linearRampToValueAtTime(0, t + 0.15);
-        osc.start(t); osc.stop(t + 0.15);
+        osc.frequency.exponentialRampToValueAtTime(freq * 1.5, t + 0.12);
+        gain.gain.setValueAtTime(0.18, t);
+        gain.gain.linearRampToValueAtTime(0, t + 0.12);
+        osc.start(t); osc.stop(t + 0.12);
       } else if (type === 'shatter') {
-        const buf = actx.createBuffer(1, actx.sampleRate * 0.2, actx.sampleRate);
+        // Realistic Glass Shatter Effect (White noise + high bandpass filter)
+        const bufferSize = actx.sampleRate * 0.25;
+        const buf = actx.createBuffer(1, bufferSize, actx.sampleRate);
         const d = buf.getChannelData(0);
-        for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.exp(-i / (actx.sampleRate * 0.05));
-        const n = actx.createBufferSource();
-        n.buffer = buf;
-        const f = actx.createBiquadFilter();
-        f.type = 'bandpass';
-        f.frequency.setValueAtTime(3500, t);
-        n.connect(f); f.connect(gain);
-        gain.gain.setValueAtTime(0.25, t);
-        gain.gain.linearRampToValueAtTime(0, t + 0.2);
-        n.start(t); n.stop(t + 0.2);
+        for (let i = 0; i < bufferSize; i++) {
+          d[i] = (Math.random() * 2 - 1) * Math.exp(-i / (actx.sampleRate * 0.06));
+        }
+        const noise = actx.createBufferSource();
+        noise.buffer = buf;
+        
+        const filter = actx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(4500, t);
+        filter.Q.setValueAtTime(3, t);
+
+        noise.connect(filter);
+        filter.connect(gain);
+        
+        gain.gain.setValueAtTime(0.3, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
+        
+        noise.start(t);
+        noise.stop(t + 0.25);
       }
+    }
+
+    function startGame() {
+      initAudio();
+      document.getElementById('start-screen').style.display = 'none';
+      document.getElementById('game-ui').style.display = 'flex';
+      buildBoard();
     }
 
     // Particle FX
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
-    canvas.width = 352; canvas.height = 352;
+    canvas.width = 360; canvas.height = 360;
     let parts = [];
 
     function emit(x, y, color) {
-      for (let i = 0; i < 10; i++) {
+      for (let i = 0; i < 12; i++) {
         parts.push({
           x, y,
-          vx: (Math.random() - 0.5) * 8,
-          vy: (Math.random() - 0.5) * 8,
-          size: Math.random() * 5 + 2,
+          vx: (Math.random() - 0.5) * 9,
+          vy: (Math.random() - 0.5) * 9,
+          size: Math.random() * 4 + 2,
           c: color,
           a: 1
         });
@@ -288,7 +362,7 @@
       ctx.clearRect(0,0,canvas.width,canvas.height);
       for(let i=parts.length-1; i>=0; i--) {
         let p = parts[i];
-        p.x += p.vx; p.y += p.vy; p.a -= 0.04;
+        p.x += p.vx; p.y += p.vy; p.a -= 0.045;
         ctx.globalAlpha = Math.max(0, p.a);
         ctx.fillStyle = p.c;
         ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill();
@@ -298,7 +372,6 @@
     }
     renderParts();
 
-    // Game Variables
     let curLevel = 1;
     let targetScore = 1200;
     let score = 0;
@@ -312,8 +385,8 @@
 
     const gems = ['c-ruby', 'c-amber', 'c-emerald', 'c-sapphire', 'c-amethyst', 'c-diamond'];
     const gemColors = {
-      'c-ruby': '#ff6b8b', 'c-amber': '#ffd166', 'c-emerald': '#4ade80',
-      'c-sapphire': '#38bdf8', 'c-amethyst': '#e879f9', 'c-diamond': '#ffffff'
+      'c-ruby': '#ff85a2', 'c-amber': '#ffea85', 'c-emerald': '#7effb2',
+      'c-sapphire': '#85dcff', 'c-amethyst': '#f4b6ff', 'c-diamond': '#ffffff'
     };
 
     const grid = document.getElementById('grid');
@@ -324,7 +397,7 @@
     function buildBoard() {
       grid.innerHTML = '<canvas id="canvas" class="particles"></canvas>';
       const c = document.getElementById('canvas');
-      c.width = 352; c.height = 352;
+      c.width = 360; c.height = 360;
       squares.length = 0;
       for (let i = 0; i < width * width; i++) {
         const sq = document.createElement('div');
@@ -342,7 +415,6 @@
       squares.forEach(sq => {
         sq.addEventListener('touchstart', e => {
           if (isGameOver) return;
-          initAudio();
           sx = e.touches[0].clientX;
           sy = e.touches[0].clientY;
           sId = parseInt(sq.id);
@@ -367,7 +439,7 @@
           }
 
           if (tId >= 0 && tId < 64) {
-            playCrystalSound('swap');
+            playGlassSound('swap');
             swap(sId, tId);
             moves--;
             movesEl.innerText = moves;
@@ -413,9 +485,9 @@
       if (matched.size > 0) {
         combo++;
         if (matched.size >= 4) {
-          playCrystalSound('shatter');
+          playGlassSound('shatter'); // Real crystal shattering sound
         } else {
-          playCrystalSound('chime', combo);
+          playGlassSound('chime', combo);
         }
 
         score += matched.size * 25 * combo;
@@ -520,10 +592,6 @@
       drop();
       checkMatches();
     }, 150);
-
-    document.addEventListener('DOMContentLoaded', () => {
-      buildBoard();
-    });
   </script>
 </body>
 </html>
